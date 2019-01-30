@@ -1,5 +1,4 @@
-Imports Microsoft.VisualBasic
-Imports System
+﻿Imports System
 Imports System.Windows.Forms
 Imports DevExpress.XtraGrid.Views.Grid
 Imports DevExpress.XtraGrid.Views.Grid.ViewInfo
@@ -10,49 +9,49 @@ Imports System.Drawing
 Imports DevExpress.XtraEditors.Repository
 
 
-Namespace WindowsApplication3
-	Partial Public Class Form1
-		Inherits Form
-		Public Sub New()
-			InitializeComponent()
-		End Sub
-		Public Sub InitData()
-			For i As Integer = 0 To 99
-				dataSet11.Tables(0).Rows.Add(New Object() { i, i, i})
-			Next i
-		End Sub
+Namespace DXSample
+    Partial Public Class Form1
+        Inherits Form
 
-		Private Sub Form1_Load(ByVal sender As Object, ByVal e As EventArgs) Handles MyBase.Load
-			Me.InitData()
-			gridControl1.ForceInitialize()
-		End Sub
+        Public Sub New()
+            InitializeComponent()
+        End Sub
+        Public Sub InitData()
+            recordBindingSource.DataSource = DataHelper.GetData(100)
+        End Sub
 
-		Private rowHandle As Integer = -1
+        Private Sub Form1_Load(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Load
+            Me.InitData()
+        End Sub
 
-		Private Sub gridView1_MouseMove(ByVal sender As Object, ByVal e As MouseEventArgs) Handles gridView1.MouseMove
-			Dim view As GridView = TryCast(sender, GridView)
-			Dim hi As GridHitInfo = view.CalcHitInfo(e.Location)
+        Private rowHandle As Integer = -1
 
-			If hi.InRowCell AndAlso hi.Column.FieldName = "FirstName" Then
-				rowHandle = hi.RowHandle
-			Else
-				rowHandle = -1
-			End If
-		   view.Invalidate()
-		End Sub
+        Private Sub gridView1_MouseMove(ByVal sender As Object, ByVal e As MouseEventArgs) Handles gridView1.MouseMove
+            Dim view As GridView = TryCast(sender, GridView)
+            Dim hi As GridHitInfo = view.CalcHitInfo(e.Location)
 
-		Private Sub gridView1_CustomDrawCell(ByVal sender As Object, ByVal e As DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs) Handles gridView1.CustomDrawCell
-			If e.Column.FieldName = "FirstName" AndAlso e.RowHandle = rowHandle Then
-				Dim info As ComboBoxViewInfo = TryCast((TryCast(e.Cell, GridCellInfo)).ViewInfo, ComboBoxViewInfo)
-				Dim args As New EditorButtonObjectInfoArgs(e.Cache, New EditorButton(ButtonPredefines.Combo), e.Appearance)
-				args.Bounds = New Rectangle(e.Bounds.Right - 17, e.Bounds.Y, 17, e.Bounds.Height)
-				info.EditorButtonPainter.DrawObject(args)
-				Dim rect As Rectangle = e.Bounds
-				rect.Offset(2, 0)
-				e.Appearance.DrawString(e.Cache, e.DisplayText, rect)
-				e.Handled = True
-			End If
-		End Sub
+            If hi.InRowCell AndAlso hi.Column.FieldName = "Text" Then
+                rowHandle = hi.RowHandle
+            Else
+                rowHandle = -1
+            End If
+           view.Invalidate()
+        End Sub
 
-	End Class
+        Private Sub gridView1_CustomDrawCell(ByVal sender As Object, ByVal e As DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs) Handles gridView1.CustomDrawCell
+            If e.Column.FieldName = "Text" AndAlso e.RowHandle = rowHandle Then
+                Dim cellInfo As GridCellInfo = TryCast(e.Cell, GridCellInfo)
+                Dim info As ButtonEditViewInfo = TryCast(cellInfo.ViewInfo, ButtonEditViewInfo)
+                Dim textRect As Rectangle = info.MaskBoxRect
+                textRect.Offset(e.Bounds.X, e.Bounds.Y)
+                Dim args As New EditorButtonObjectInfoArgs(e.Cache, info.Item.Buttons(0), e.Appearance)
+                Dim minBounds As Rectangle = info.EditorButtonPainter.CalcObjectMinBounds(args)
+                args.Bounds = New Rectangle(e.Bounds.Right - minBounds.Width, e.Bounds.Y + (e.Bounds.Height - minBounds.Height) \ 2, minBounds.Width, minBounds.Height)
+                info.EditorButtonPainter.DrawObject(args)
+                e.Cache.DrawString(e.DisplayText, e.Appearance.Font, e.Appearance.GetForeBrush(e.Cache), textRect, e.Appearance.GetStringFormat())
+                e.Handled = True
+            End If
+        End Sub
+
+    End Class
 End Namespace

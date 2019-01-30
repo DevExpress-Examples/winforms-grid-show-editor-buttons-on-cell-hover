@@ -9,19 +9,17 @@ using System.Drawing;
 using DevExpress.XtraEditors.Repository;
 
 
-namespace WindowsApplication3 {
+namespace DXSample {
     public partial class Form1: Form {
         public Form1() {
             InitializeComponent();
         }
         public void InitData() {
-            for(int i = 0;i < 100;i++)
-                dataSet11.Tables[0].Rows.Add(new object[] { i, i, i});
+            recordBindingSource.DataSource = DataHelper.GetData(100);
         }
        
         private void Form1_Load(object sender, EventArgs e) {
             this.InitData();
-            gridControl1.ForceInitialize();
         }
        
         int rowHandle = -1;
@@ -30,7 +28,7 @@ namespace WindowsApplication3 {
             GridView view = sender as GridView;
             GridHitInfo hi = view.CalcHitInfo(e.Location);
 
-            if(hi.InRowCell && hi.Column.FieldName == "FirstName") 
+            if(hi.InRowCell && hi.Column.FieldName == "Text") 
                 rowHandle = hi.RowHandle;
             else
                 rowHandle = -1;
@@ -38,14 +36,16 @@ namespace WindowsApplication3 {
         }
 
         private void gridView1_CustomDrawCell(object sender, DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e) {
-            if(e.Column.FieldName == "FirstName" && e.RowHandle == rowHandle) {
-                ComboBoxViewInfo info = (e.Cell as GridCellInfo).ViewInfo as ComboBoxViewInfo;
-                EditorButtonObjectInfoArgs args = new EditorButtonObjectInfoArgs(e.Cache, new EditorButton(ButtonPredefines.Combo), e.Appearance);
-                args.Bounds = new Rectangle(e.Bounds.Right - 17, e.Bounds.Y, 17, e.Bounds.Height);
+            if(e.Column.FieldName == "Text" && e.RowHandle == rowHandle) {
+                GridCellInfo cellInfo = e.Cell as GridCellInfo;
+                ButtonEditViewInfo info = cellInfo.ViewInfo as ButtonEditViewInfo;
+                Rectangle textRect = info.MaskBoxRect;
+                textRect.Offset(e.Bounds.X, e.Bounds.Y);
+                EditorButtonObjectInfoArgs args = new EditorButtonObjectInfoArgs(e.Cache, info.Item.Buttons[0], e.Appearance);
+                Rectangle minBounds = info.EditorButtonPainter.CalcObjectMinBounds(args);
+                args.Bounds = new Rectangle(e.Bounds.Right - minBounds.Width, e.Bounds.Y + (e.Bounds.Height - minBounds.Height) / 2, minBounds.Width, minBounds.Height);
                 info.EditorButtonPainter.DrawObject(args);
-                Rectangle rect = e.Bounds;
-                rect.Offset(2, 0);
-                e.Appearance.DrawString(e.Cache, e.DisplayText, rect);
+                e.Cache.DrawString(e.DisplayText, e.Appearance.Font, e.Appearance.GetForeBrush(e.Cache), textRect, e.Appearance.GetStringFormat());
                 e.Handled = true;
             }
         }

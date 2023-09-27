@@ -10,7 +10,7 @@ In this example:
 
 The [GridView.OptionsView.ShowButtonMode](https://docs.devexpress.com/WindowsForms/DevExpress.XtraGrid.Views.Base.ColumnViewOptionsView.ShowButtonMode) property speifies when the View displays editor buttons. Available modes include:
 
-* Display editor buttons for all cdata ells.
+* Display editor buttons for all data cells.
 * Display editor buttons for the focused cell.
 * Display editor buttons for data cells within the focused row.
 * Display editor buttons for the active cell editor.
